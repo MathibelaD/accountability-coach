@@ -3,20 +3,46 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { SendMessageButton } from "@/components/SendMessageButton";
 import { InviteLink } from "@/components/InviteLink";
-import { Prisma } from "@prisma/client";
 
-type ChallengeWithRelations = Prisma.ChallengeGetPayload<{
-  include: {
-    tasks: true;
-    members: { include: { user: { select: { id: true; name: true; email: true } } } };
-    checkins: { include: { completions: true; user: { select: { name: true } } } };
-    photos: { include: { user: { select: { name: true } } } };
-  };
-}>;
+interface UserSelect {
+  id: string;
+  name: string;
+  email: string;
+}
 
-type MemberRow = ChallengeWithRelations["members"][number];
-type CheckinRow = ChallengeWithRelations["checkins"][number];
-type PhotoRow = ChallengeWithRelations["photos"][number];
+interface MemberRow {
+  id: string;
+  challengeId: string;
+  userId: string;
+  joinedAt: Date;
+  user: UserSelect;
+}
+
+interface CheckinRow {
+  id: string;
+  userId: string;
+  challengeId: string;
+  date: Date;
+  notes: string | null;
+  weight: number | null;
+  waistMeasurement: number | null;
+  waterIntake: number | null;
+  createdAt: Date;
+  completions: { id: string; checkinId: string; taskId: string; completed: boolean }[];
+  user: { name: string };
+}
+
+interface PhotoRow {
+  id: string;
+  userId: string;
+  challengeId: string;
+  imageUrl: string;
+  type: string;
+  caption: string | null;
+  shared: boolean;
+  uploadedAt: Date;
+  user: { name: string };
+}
 
 interface MemberStats extends MemberRow {
   checkedInToday: boolean;
@@ -44,9 +70,9 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
 
   if (!challenge) redirect("/coach");
 
-  const members: MemberRow[] = challenge.members;
-  const checkins: CheckinRow[] = challenge.checkins;
-  const photos: PhotoRow[] = challenge.photos;
+  const members = challenge.members as unknown as MemberRow[];
+  const checkins = challenge.checkins as unknown as CheckinRow[];
+  const photos = challenge.photos as unknown as PhotoRow[];
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -81,7 +107,6 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
 
   return (
     <div className="space-y-5 stagger">
-      {/* Challenge Header */}
       <div className="card">
         <h2 className="text-xl font-extrabold text-gray-900">{challenge.title}</h2>
         {challenge.description && <p className="text-sm text-gray-500 mt-1">{challenge.description}</p>}
@@ -92,10 +117,8 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
         </div>
       </div>
 
-      {/* Invite Link */}
       <InviteLink url={inviteCode} />
 
-      {/* Members Progress */}
       <div className="space-y-3">
         <h3 className="font-bold text-gray-800">Members Progress</h3>
         {membersWithStats.length === 0 ? (
@@ -103,7 +126,6 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
         ) : (
           membersWithStats.map((m: MemberStats) => (
             <div key={m.id} className="card space-y-3">
-              {/* Member header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-[#5f7a6a]/10 rounded-full flex items-center justify-center">
@@ -122,7 +144,6 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
                 </div>
               </div>
 
-              {/* Stats row */}
               <div className="grid grid-cols-3 gap-2">
                 <div className="bg-[#f9f6f2] rounded-xl p-3 text-center">
                   <p className="text-lg font-extrabold text-[#c4a882]">🔥 {m.streak}</p>
@@ -140,7 +161,6 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
                 </div>
               </div>
 
-              {/* Latest check-in data */}
               {m.latestCheckin && (
                 <div className="bg-[#f9f6f2] rounded-xl p-3 border border-[#e8ddd0]/60">
                   <p className="text-xs font-semibold text-gray-500 mb-1">Latest Check-in — {new Date(m.latestCheckin.date).toLocaleDateString()}</p>
@@ -153,7 +173,6 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
                 </div>
               )}
 
-              {/* Member photos */}
               {m.memberPhotos.length > 0 && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 mb-2">Progress Photos</p>
