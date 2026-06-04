@@ -1,0 +1,105 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String           @id @default(cuid())
+  name           String
+  email          String           @unique
+  password       String
+  role           String           @default("member") // "coach" or "member"
+  createdAt      DateTime         @default(now())
+  challenges     Challenge[]
+  memberships    ChallengeMember[]
+  checkins       DailyCheckin[]
+  photos         ProgressPhoto[]
+}
+
+model Challenge {
+  id          String            @id @default(cuid())
+  coachId     String
+  coach       User              @relation(fields: [coachId], references: [id])
+  title       String
+  description String?
+  imageUrl    String?
+  startDate   DateTime
+  endDate     DateTime
+  active      Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  members     ChallengeMember[]
+  tasks       Task[]
+  checkins    DailyCheckin[]
+  photos      ProgressPhoto[]
+  announcements Announcement[]
+}
+
+model ChallengeMember {
+  id          String    @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  joinedAt    DateTime  @default(now())
+
+  @@unique([challengeId, userId])
+}
+
+model Task {
+  id          String           @id @default(cuid())
+  challengeId String
+  challenge   Challenge        @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  name        String
+  completions TaskCompletion[]
+}
+
+model DailyCheckin {
+  id               String           @id @default(cuid())
+  userId           String
+  user             User             @relation(fields: [userId], references: [id])
+  challengeId      String
+  challenge        Challenge        @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  date             DateTime
+  notes            String?
+  weight           Float?
+  waistMeasurement Float?
+  waterIntake      Float?
+  createdAt        DateTime         @default(now())
+  completions      TaskCompletion[]
+
+  @@unique([userId, challengeId, date])
+}
+
+model TaskCompletion {
+  id        String       @id @default(cuid())
+  checkinId String
+  checkin   DailyCheckin @relation(fields: [checkinId], references: [id], onDelete: Cascade)
+  taskId    String
+  task      Task         @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  completed Boolean      @default(false)
+
+  @@unique([checkinId, taskId])
+}
+
+model ProgressPhoto {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  imageUrl    String
+  uploadedAt  DateTime  @default(now())
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  message     String
+  type        String    @default("announcement") // "announcement", "motivation", "reminder"
+  createdAt   DateTime  @default(now())
+}
