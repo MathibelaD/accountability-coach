@@ -21,11 +21,13 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
 
   if (!challenge) redirect("/coach");
 
+  const { members, checkins, photos, tasks } = challenge;
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const membersWithStats = challenge.members.map((m) => {
-    const memberCheckins = challenge.checkins.filter((c) => c.userId === m.userId);
+  const membersWithStats = members.map((m) => {
+    const memberCheckins = checkins.filter((c) => c.userId === m.userId);
     const checkedInToday = memberCheckins.some((c) => new Date(c.date) >= today);
     let streak = 0;
     const sorted = memberCheckins.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -45,7 +47,7 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
       ? (latestCheckin.weight - firstCheckin.weight).toFixed(1)
       : null;
 
-    const memberPhotos = challenge.photos.filter((p) => p.userId === m.userId);
+    const memberPhotos = photos.filter((p) => p.userId === m.userId);
 
     return { ...m, checkedInToday, streak, totalCheckins: memberCheckins.length, latestCheckin, weightChange, memberPhotos };
   });
@@ -60,8 +62,8 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
         {challenge.description && <p className="text-sm text-gray-500 mt-1">{challenge.description}</p>}
         <div className="flex flex-wrap gap-3 mt-3 text-xs text-gray-500">
           <span>📅 {new Date(challenge.startDate).toLocaleDateString()} – {new Date(challenge.endDate).toLocaleDateString()}</span>
-          <span>👥 {challenge.members.length} members</span>
-          <span>📸 {challenge.photos.length} photos</span>
+          <span>👥 {members.length} members</span>
+          <span>📸 {photos.length} photos</span>
         </div>
       </div>
 
