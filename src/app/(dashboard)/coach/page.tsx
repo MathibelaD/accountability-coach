@@ -25,38 +25,41 @@ export default async function CoachDashboard() {
   const engagement = totalMembers > 0 ? Math.round((todayCheckins / totalMembers) * 100) : 0;
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold text-gray-900">Hey, {session.user.name} 👋</h2>
+    <div className="space-y-6 stagger">
+      <div>
+        <h2 className="text-2xl font-extrabold text-gray-900">Hey, {session.user.name} 👋</h2>
+        <p className="text-gray-500 text-sm mt-1">Here&apos;s how your team is doing today</p>
+      </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="card text-center">
-          <p className="text-2xl font-bold text-indigo-600">{challenges.length}</p>
-          <p className="text-xs text-gray-500">Active Challenges</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="stat-card text-center">
+          <p className="text-3xl font-extrabold text-[#5f7a6a]">{challenges.length}</p>
+          <p className="text-xs text-gray-500 mt-1">Challenges</p>
         </div>
-        <div className="card text-center">
-          <p className="text-2xl font-bold text-indigo-600">{totalMembers}</p>
-          <p className="text-xs text-gray-500">Total Members</p>
+        <div className="stat-card text-center">
+          <p className="text-3xl font-extrabold text-[#5f7a6a]">{totalMembers}</p>
+          <p className="text-xs text-gray-500 mt-1">Members</p>
         </div>
-        <div className="card text-center">
-          <p className="text-2xl font-bold text-green-600">{todayCheckins}</p>
-          <p className="text-xs text-gray-500">Checked In Today</p>
+        <div className="stat-card text-center">
+          <p className="text-3xl font-extrabold text-[#5f7a6a]">{todayCheckins}</p>
+          <p className="text-xs text-gray-500 mt-1">Checked In</p>
         </div>
-        <div className="card text-center">
-          <p className="text-2xl font-bold text-red-500">{missedToday}</p>
-          <p className="text-xs text-gray-500">Missed Today</p>
+        <div className="stat-card text-center">
+          <p className="text-3xl font-extrabold text-[#c45d4a]">{missedToday}</p>
+          <p className="text-xs text-gray-500 mt-1">Missed</p>
         </div>
       </div>
 
       {/* Engagement */}
       <div className="card">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-700">Engagement</span>
-          <span className="text-sm font-bold text-indigo-600">{engagement}%</span>
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-sm font-semibold text-gray-700">Today&apos;s Engagement</span>
+          <span className="text-lg font-extrabold text-[#5f7a6a]">{engagement}%</span>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-3">
+        <div className="w-full bg-[#e8ddd0]/50 rounded-full h-3 overflow-hidden">
           <div
-            className="bg-indigo-500 h-3 rounded-full transition-all"
+            className="progress-bar h-3 rounded-full transition-all duration-500"
             style={{ width: `${engagement}%` }}
           />
         </div>
@@ -64,24 +67,38 @@ export default async function CoachDashboard() {
 
       {/* Challenges List */}
       <div className="space-y-3">
-        <h3 className="font-semibold text-gray-700">Your Challenges</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-gray-800">Your Challenges</h3>
+          <Link href="/coach/challenges/new" className="text-sm text-[#5f7a6a] font-medium hover:underline">
+            + New
+          </Link>
+        </div>
         {challenges.length === 0 ? (
-          <div className="card text-center py-8">
-            <p className="text-gray-400 mb-3">No challenges yet</p>
-            <Link href="/coach/challenges/new" className="btn-primary inline-block">
+          <div className="card text-center py-10">
+            <p className="text-4xl mb-3">🌱</p>
+            <p className="text-gray-500 font-medium">No challenges yet</p>
+            <Link href="/coach/challenges/new" className="btn-primary inline-block mt-4">
               Create Your First Challenge
             </Link>
           </div>
         ) : (
-          challenges.map((c) => (
-            <Link key={c.id} href={`/coach/challenges/${c.id}`} className="card block">
-              <h4 className="font-semibold text-gray-900">{c.title}</h4>
-              <p className="text-xs text-gray-500 mt-1">
-                {c.members.length} members • Ends{" "}
-                {new Date(c.endDate).toLocaleDateString()}
-              </p>
-            </Link>
-          ))
+          <div className="grid gap-3 md:grid-cols-2">
+            {challenges.map((c) => (
+              <Link key={c.id} href={`/coach/challenges/${c.id}`} className="card block group">
+                <h4 className="font-bold text-gray-900 group-hover:text-[#5f7a6a] transition-colors">
+                  {c.title}
+                </h4>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-xs bg-[#5f7a6a]/10 text-[#3d5a4a] px-2 py-0.5 rounded-full font-medium">
+                    {c.members.length} members
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    Ends {new Date(c.endDate).toLocaleDateString()}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
         )}
       </div>
     </div>

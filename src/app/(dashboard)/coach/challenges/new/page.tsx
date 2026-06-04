@@ -101,7 +101,7 @@ export default function NewChallengePage() {
               )}
             </div>
           ))}
-          <button type="button" onClick={addTask} className="text-sm text-indigo-500 font-medium">
+          <button type="button" onClick={addTask} className="text-sm text-[#5f7a6a] font-medium">
             + Add Task
           </button>
         </div>

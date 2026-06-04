@@ -1,31 +1,115 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  --primary: #5f7a6a;
+  --primary-light: #7d9b8a;
+  --primary-dark: #3d5a4a;
+  --accent: #c4a882;
+  --accent-light: #e8ddd0;
+  --success: #5f7a6a;
+  --danger: #c45d4a;
+  --surface: #ffffff;
+  --bg: #f9f6f2;
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f8fafc;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
   min-height: 100dvh;
+  color: #3d3d3d;
 }
 
+/* Auth gradient - earthy sage */
+.auth-bg {
+  background: linear-gradient(145deg, #3d5a4a 0%, #5f7a6a 50%, #7d9b8a 100%);
+  position: relative;
+  overflow: hidden;
+}
+.auth-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(196, 168, 130, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(93, 122, 106, 0.2) 0%, transparent 50%);
+}
+
+/* Glow */
+.glow {
+  box-shadow: 0 0 40px rgba(95, 122, 106, 0.25), 0 0 80px rgba(95, 122, 106, 0.1);
+}
+
+/* Buttons */
 .btn-primary {
-  @apply bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-6 rounded-xl transition-all active:scale-95;
+  @apply bg-[#5f7a6a] hover:bg-[#4a6555] text-white font-semibold py-3 px-6 rounded-xl transition-all active:scale-95 shadow-lg shadow-[#5f7a6a]/20;
 }
-
 .btn-secondary {
-  @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all active:scale-95;
+  @apply bg-white hover:bg-[#f9f6f2] text-[#3d5a4a] font-semibold py-3 px-6 rounded-xl transition-all active:scale-95 border border-[#e8ddd0] shadow-sm;
 }
 
+/* Card */
 .card {
-  @apply bg-white rounded-2xl p-4 shadow-sm border border-gray-100;
+  @apply bg-white rounded-2xl p-5 shadow-sm border border-[#e8ddd0]/60 transition-all hover:shadow-md;
 }
 
+/* Input */
 .input {
-  @apply w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none transition-all;
+  @apply w-full px-4 py-3 rounded-xl border border-[#e8ddd0] bg-[#fdfcfa] focus:bg-white focus:border-[#7d9b8a] focus:ring-2 focus:ring-[#5f7a6a]/10 outline-none transition-all;
+}
+
+/* Stat card */
+.stat-card {
+  @apply bg-white rounded-2xl p-5 border border-[#e8ddd0]/60 relative overflow-hidden transition-all hover:shadow-md;
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.4s ease-out forwards;
+}
+
+.stagger > * { opacity: 0; animation: fadeUp 0.4s ease-out forwards; }
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 60ms; }
+.stagger > *:nth-child(3) { animation-delay: 120ms; }
+.stagger > *:nth-child(4) { animation-delay: 180ms; }
+.stagger > *:nth-child(5) { animation-delay: 240ms; }
+.stagger > *:nth-child(6) { animation-delay: 300ms; }
+
+/* Progress bar */
+@keyframes shimmer {
+  0% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+.progress-bar {
+  background: linear-gradient(90deg, #5f7a6a, #7d9b8a, #5f7a6a);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Streak pulse */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(196, 168, 130, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(196, 168, 130, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(196, 168, 130, 0); }
+}
+.streak-pulse {
+  animation: pulse-ring 2s infinite;
+}
+
+@media (min-width: 768px) {
+  .card {
+    @apply p-6;
+  }
 }

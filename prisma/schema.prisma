@@ -18,6 +18,7 @@ model User {
   memberships    ChallengeMember[]
   checkins       DailyCheckin[]
   photos         ProgressPhoto[]
+  products       Product[]
 }
 
 model Challenge {
@@ -36,6 +37,7 @@ model Challenge {
   checkins    DailyCheckin[]
   photos      ProgressPhoto[]
   announcements Announcement[]
+  products      ChallengeProduct[]
 }
 
 model ChallengeMember {
@@ -102,4 +104,26 @@ model Announcement {
   message     String
   type        String    @default("announcement") // "announcement", "motivation", "reminder"
   createdAt   DateTime  @default(now())
+}
+
+model Product {
+  id           String             @id @default(cuid())
+  coachId      String
+  coach        User               @relation(fields: [coachId], references: [id])
+  name         String
+  description  String?
+  imageUrl     String?
+  instructions String?            // usage instructions
+  createdAt    DateTime           @default(now())
+  challenges   ChallengeProduct[]
+}
+
+model ChallengeProduct {
+  id          String    @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([challengeId, productId])
 }

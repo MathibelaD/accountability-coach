@@ -16,7 +16,6 @@ export default async function MemberHome() {
 
   const activeChallenge = memberships.find((m) => m.challenge.active)?.challenge;
 
-  // Calculate streak
   let streak = 0;
   let progressPct = 0;
   let todayCheckin = null;
@@ -31,7 +30,6 @@ export default async function MemberHome() {
     today.setHours(0, 0, 0, 0);
     todayCheckin = checkins.find((c) => new Date(c.date).getTime() === today.getTime());
 
-    // Streak calc
     for (let i = 0; i < checkins.length; i++) {
       const expected = new Date(today);
       expected.setDate(expected.getDate() - i);
@@ -41,7 +39,6 @@ export default async function MemberHome() {
       } else break;
     }
 
-    // Progress: days completed / total days
     const totalDays = Math.ceil(
       (new Date(activeChallenge.endDate).getTime() - new Date(activeChallenge.startDate).getTime()) /
         (1000 * 60 * 60 * 24)
@@ -50,67 +47,75 @@ export default async function MemberHome() {
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold text-gray-900">Hey, {session.user.name} 👋</h2>
+    <div className="space-y-5 stagger">
+      <div>
+        <h2 className="text-2xl font-extrabold text-gray-900">Hey, {session.user.name} 👋</h2>
+        <p className="text-gray-500 text-sm mt-1">You&apos;re making progress. Keep going.</p>
+      </div>
 
       {activeChallenge ? (
         <>
-          {/* Current Challenge Card */}
-          <div className="card">
-            <h3 className="font-semibold text-gray-900">{activeChallenge.title}</h3>
-            <div className="flex items-center gap-4 mt-3">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-orange-500">🔥 {streak}</p>
-                <p className="text-[10px] text-gray-500">Day Streak</p>
+          {/* Streak + Progress */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="stat-card text-center col-span-1">
+              <div className="w-14 h-14 mx-auto bg-[#c4a882]/15 rounded-full flex items-center justify-center streak-pulse">
+                <span className="text-2xl">🔥</span>
               </div>
-              <div className="flex-1">
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-500">Progress</span>
-                  <span className="font-bold text-indigo-600">{progressPct}%</span>
-                </div>
-                <div className="w-full bg-gray-100 rounded-full h-3">
-                  <div
-                    className="bg-indigo-500 h-3 rounded-full"
-                    style={{ width: `${Math.min(progressPct, 100)}%` }}
-                  />
-                </div>
+              <p className="text-2xl font-extrabold text-[#c4a882] mt-2">{streak}</p>
+              <p className="text-[10px] text-gray-500 font-medium">Day Streak</p>
+            </div>
+            <div className="stat-card col-span-2">
+              <p className="text-xs font-semibold text-gray-500 mb-1">Challenge Progress</p>
+              <p className="text-2xl font-extrabold text-[#5f7a6a]">{progressPct}%</p>
+              <div className="w-full bg-[#e8ddd0]/50 rounded-full h-2.5 mt-2 overflow-hidden">
+                <div
+                  className="progress-bar h-2.5 rounded-full"
+                  style={{ width: `${Math.min(progressPct, 100)}%` }}
+                />
               </div>
+              <p className="text-xs text-gray-400 mt-2 truncate">{activeChallenge.title}</p>
             </div>
           </div>
 
           {/* Today's Tasks */}
           <div className="card">
-            <h3 className="font-semibold text-gray-700 mb-2">Today&apos;s Tasks</h3>
-            <ul className="space-y-2">
+            <h3 className="font-bold text-gray-800 mb-3">Today&apos;s Tasks</h3>
+            <ul className="space-y-2.5">
               {activeChallenge.tasks.map((task) => (
-                <li key={task.id} className="flex items-center gap-2 text-sm text-gray-600">
-                  <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center text-xs ${
-                    todayCheckin ? "bg-green-100 border-green-400 text-green-600" : "border-gray-300"
+                <li key={task.id} className="flex items-center gap-3">
+                  <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs shrink-0 ${
+                    todayCheckin
+                      ? "bg-[#5f7a6a]/10 border-[#5f7a6a] text-[#5f7a6a]"
+                      : "border-[#e8ddd0]"
                   }`}>
                     {todayCheckin ? "✓" : ""}
                   </span>
-                  {task.name}
+                  <span className={`text-sm ${todayCheckin ? "text-gray-400 line-through" : "text-gray-700"}`}>
+                    {task.name}
+                  </span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* CTA */}
-          {!todayCheckin && (
-            <Link href="/member/checkin" className="btn-primary block text-center w-full text-lg">
+          {!todayCheckin ? (
+            <Link
+              href="/member/checkin"
+              className="btn-primary block text-center w-full text-lg py-4"
+            >
               ✅ Complete Today&apos;s Check-In
             </Link>
-          )}
-          {todayCheckin && (
-            <div className="bg-green-50 text-green-700 text-center py-4 rounded-2xl font-medium">
+          ) : (
+            <div className="bg-[#5f7a6a]/10 text-[#3d5a4a] text-center py-4 rounded-2xl font-semibold border border-[#5f7a6a]/20">
               ✓ You&apos;ve checked in today! Great job! 🎉
             </div>
           )}
         </>
       ) : (
-        <div className="card text-center py-8">
-          <p className="text-4xl mb-3">🎯</p>
-          <p className="text-gray-500">No active challenges</p>
+        <div className="card text-center py-12">
+          <p className="text-5xl mb-4">🌿</p>
+          <p className="text-gray-700 font-semibold">No active challenges</p>
           <p className="text-sm text-gray-400 mt-1">Ask your coach for an invite link</p>
         </div>
       )}
