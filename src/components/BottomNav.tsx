@@ -12,8 +12,9 @@ const coachNav = [
 const memberNav = [
   { href: "/member", label: "Home", icon: "🏠" },
   { href: "/member/checkin", label: "Check In", icon: "✅" },
-  { href: "/member/products", label: "Products", icon: "📦" },
   { href: "/member/progress", label: "Progress", icon: "📈" },
+  { href: "/member/community", label: "Community", icon: "👥" },
+  { href: "/member/products", label: "Products", icon: "📦" },
 ];
 
 export function BottomNav({ role }: { role: string }) {

@@ -94,6 +94,9 @@ model ProgressPhoto {
   challengeId String
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   imageUrl    String
+  type        String    @default("update") // "before", "after", "update"
+  caption     String?
+  shared      Boolean   @default(false) // visible to other members
   uploadedAt  DateTime  @default(now())
 }
 

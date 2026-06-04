@@ -13,8 +13,9 @@ const coachNav = [
 const memberNav = [
   { href: "/member", label: "Dashboard", icon: "🏠" },
   { href: "/member/checkin", label: "Daily Check-In", icon: "✅" },
-  { href: "/member/products", label: "Products", icon: "📦" },
   { href: "/member/progress", label: "Progress", icon: "📈" },
+  { href: "/member/community", label: "Community", icon: "👥" },
+  { href: "/member/products", label: "Products", icon: "📦" },
   { href: "/member/achievements", label: "Achievements", icon: "🏆" },
 ];
 
@@ -72,10 +73,13 @@ export function SideNav({ role, name }: { role: string; name: string }) {
           </div>
         </div>
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="w-full mt-2 px-4 py-2.5 text-sm font-medium text-[#c45d4a] hover:bg-[#c45d4a]/10 rounded-xl transition-all text-left"
+          onClick={async () => {
+            await signOut({ redirect: false });
+            window.location.href = "/login";
+          }}
+          className="w-full mt-3 px-4 py-3 text-sm font-semibold text-white bg-[#c45d4a] hover:bg-[#b04d3d] rounded-xl transition-all active:scale-95 text-center"
         >
-          Sign Out
+          Log Out
         </button>
       </div>
     </aside>

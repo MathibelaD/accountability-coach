@@ -11,10 +11,13 @@ export function MobileHeader() {
         <h1 className="font-bold text-gray-900">AccountaBuddy</h1>
       </div>
       <button
-        onClick={() => signOut({ callbackUrl: "/login" })}
-        className="text-xs text-[#c45d4a] font-medium px-2.5 py-1 rounded-full hover:bg-[#c45d4a]/10 transition-all"
+        onClick={async () => {
+          await signOut({ redirect: false });
+          window.location.href = "/login";
+        }}
+        className="text-xs font-semibold text-white bg-[#c45d4a] px-3 py-1.5 rounded-lg active:scale-95 transition-all"
       >
-        Sign Out
+        Log Out
       </button>
     </header>
   );
