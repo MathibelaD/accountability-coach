@@ -21,13 +21,19 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
 
   if (!challenge) redirect("/coach");
 
-  const { members, checkins, photos, tasks } = challenge;
+  const members = challenge!.members;
+  const checkins = challenge!.checkins;
+  const photos = challenge!.photos;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const membersWithStats = members.map((m) => {
-    const memberCheckins = checkins.filter((c) => c.userId === m.userId);
+  type Member = (typeof members)[number];
+  type Checkin = (typeof checkins)[number];
+  type Photo = (typeof photos)[number];
+
+  const membersWithStats = members.map((m: Member) => {
+    const memberCheckins = checkins.filter((c: Checkin) => c.userId === m.userId);
     const checkedInToday = memberCheckins.some((c) => new Date(c.date) >= today);
     let streak = 0;
     const sorted = memberCheckins.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
