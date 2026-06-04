@@ -3,6 +3,29 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { SendMessageButton } from "@/components/SendMessageButton";
 import { InviteLink } from "@/components/InviteLink";
+import { Prisma } from "@prisma/client";
+
+type ChallengeWithRelations = Prisma.ChallengeGetPayload<{
+  include: {
+    tasks: true;
+    members: { include: { user: { select: { id: true; name: true; email: true } } } };
+    checkins: { include: { completions: true; user: { select: { name: true } } } };
+    photos: { include: { user: { select: { name: true } } } };
+  };
+}>;
+
+type MemberRow = ChallengeWithRelations["members"][number];
+type CheckinRow = ChallengeWithRelations["checkins"][number];
+type PhotoRow = ChallengeWithRelations["photos"][number];
+
+interface MemberStats extends MemberRow {
+  checkedInToday: boolean;
+  streak: number;
+  totalCheckins: number;
+  latestCheckin: CheckinRow | undefined;
+  weightChange: string | null;
+  memberPhotos: PhotoRow[];
+}
 
 export default async function ChallengeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -21,22 +44,18 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
 
   if (!challenge) redirect("/coach");
 
-  const members = challenge!.members;
-  const checkins = challenge!.checkins;
-  const photos = challenge!.photos;
+  const members: MemberRow[] = challenge.members;
+  const checkins: CheckinRow[] = challenge.checkins;
+  const photos: PhotoRow[] = challenge.photos;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  type Member = (typeof members)[number];
-  type Checkin = (typeof checkins)[number];
-  type Photo = (typeof photos)[number];
-
-  const membersWithStats = members.map((m: Member) => {
-    const memberCheckins: Checkin[] = checkins.filter((c: Checkin) => c.userId === m.userId);
-    const checkedInToday = memberCheckins.some((c: Checkin) => new Date(c.date) >= today);
+  const membersWithStats: MemberStats[] = members.map((m: MemberRow) => {
+    const memberCheckins: CheckinRow[] = checkins.filter((c: CheckinRow) => c.userId === m.userId);
+    const checkedInToday = memberCheckins.some((c: CheckinRow) => new Date(c.date) >= today);
     let streak = 0;
-    const sorted = memberCheckins.sort((a: Checkin, b: Checkin) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const sorted = [...memberCheckins].sort((a: CheckinRow, b: CheckinRow) => new Date(b.date).getTime() - new Date(a.date).getTime());
     for (const ch of sorted) {
       const d = new Date(ch.date);
       const expected = new Date(today);
@@ -53,7 +72,7 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
       ? (latestCheckin.weight - firstCheckin.weight).toFixed(1)
       : null;
 
-    const memberPhotos: Photo[] = photos.filter((p: Photo) => p.userId === m.userId);
+    const memberPhotos: PhotoRow[] = photos.filter((p: PhotoRow) => p.userId === m.userId);
 
     return { ...m, checkedInToday, streak, totalCheckins: memberCheckins.length, latestCheckin, weightChange, memberPhotos };
   });
@@ -82,7 +101,7 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
         {membersWithStats.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-4">No members yet. Share the invite link!</p>
         ) : (
-          membersWithStats.map((m) => (
+          membersWithStats.map((m: MemberStats) => (
             <div key={m.id} className="card space-y-3">
               {/* Member header */}
               <div className="flex items-center justify-between">
@@ -139,7 +158,7 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
                 <div>
                   <p className="text-xs font-semibold text-gray-500 mb-2">Progress Photos</p>
                   <div className="grid grid-cols-4 gap-1.5">
-                    {m.memberPhotos.slice(0, 4).map((p) => (
+                    {m.memberPhotos.slice(0, 4).map((p: PhotoRow) => (
                       <div key={p.id} className="relative">
                         <img
                           src={p.imageUrl}
