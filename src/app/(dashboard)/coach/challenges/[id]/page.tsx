@@ -33,10 +33,10 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
   type Photo = (typeof photos)[number];
 
   const membersWithStats = members.map((m: Member) => {
-    const memberCheckins = checkins.filter((c: Checkin) => c.userId === m.userId);
-    const checkedInToday = memberCheckins.some((c) => new Date(c.date) >= today);
+    const memberCheckins: Checkin[] = checkins.filter((c: Checkin) => c.userId === m.userId);
+    const checkedInToday = memberCheckins.some((c: Checkin) => new Date(c.date) >= today);
     let streak = 0;
-    const sorted = memberCheckins.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const sorted = memberCheckins.sort((a: Checkin, b: Checkin) => new Date(b.date).getTime() - new Date(a.date).getTime());
     for (const ch of sorted) {
       const d = new Date(ch.date);
       const expected = new Date(today);
@@ -53,7 +53,7 @@ export default async function ChallengeDetailPage({ params }: { params: Promise<
       ? (latestCheckin.weight - firstCheckin.weight).toFixed(1)
       : null;
 
-    const memberPhotos = photos.filter((p) => p.userId === m.userId);
+    const memberPhotos: Photo[] = photos.filter((p: Photo) => p.userId === m.userId);
 
     return { ...m, checkedInToday, streak, totalCheckins: memberCheckins.length, latestCheckin, weightChange, memberPhotos };
   });
